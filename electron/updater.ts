@@ -54,12 +54,3 @@ export async function setupAutoUpdater() {
 
   return autoUpdater;
 }
-
-export async function installUpdate() {
-  try {
-    const { autoUpdater } = await import('electron-updater');
-    autoUpdater.quitAndInstall();
-  } catch {
-    console.log('electron-updater 不可用');
-  }
-}

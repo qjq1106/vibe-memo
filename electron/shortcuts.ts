@@ -16,7 +16,3 @@ export function registerShortcuts(mainWindow: BrowserWindow) {
     }
   });
 }
-
-export function unregisterShortcuts() {
-  globalShortcut.unregisterAll();
-}

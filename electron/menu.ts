@@ -1,10 +1,8 @@
 import { Menu, BrowserWindow, shell, app } from 'electron';
-
-// 扩展 app 类型
-type AppWithState = typeof app & { isQuitting: boolean };
+import { getAppState } from './app-state';
 
 export function createMenu(mainWindow: BrowserWindow) {
-  const appState = app as AppWithState;
+  const appState = getAppState();
 
   const template: Electron.MenuItemConstructorOptions[] = [
     {

@@ -19,6 +19,10 @@ export interface ElectronAPI {
     hide: () => void;
     show: () => void;
   };
+  note: {
+    onCreate: (callback: () => void) => void;
+    onSave: (callback: () => void) => void;
+  };
   update: {
     check: () => Promise<unknown>;
     install: () => void;

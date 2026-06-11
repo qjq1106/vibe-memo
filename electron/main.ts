@@ -6,10 +6,9 @@ import { createMenu } from './menu';
 import { registerShortcuts } from './shortcuts';
 import { setupDarkMode } from './dark-mode';
 import { setupAutoUpdater } from './updater';
+import { getAppState } from './app-state';
 
-// 扩展 app 类型以支持自定义属性
-type AppWithState = typeof app & { isQuitting: boolean };
-const appState = app as AppWithState;
+const appState = getAppState();
 appState.isQuitting = false;
 
 const isDev = !app.isPackaged;
@@ -97,8 +96,6 @@ app.on('window-all-closed', () => {
 });
 
 // 标记退出状态
-app.on('before-quit', () => {
+  app.on('before-quit', () => {
   appState.isQuitting = true;
 });
-
-export { mainWindow };

@@ -1,8 +1,6 @@
-import { Tray, Menu, BrowserWindow, nativeImage, app } from 'electron';
+import { Tray, Menu, BrowserWindow, nativeImage } from 'electron';
 import * as path from 'path';
-
-// 扩展 app 类型
-type AppWithState = typeof app & { isQuitting: boolean };
+import { getAppState } from './app-state';
 
 let tray: Tray | null = null;
 
@@ -23,7 +21,7 @@ export function createTray(mainWindow: BrowserWindow) {
   tray = new Tray(trayIcon);
   tray.setToolTip('Vibe Memo');
 
-  const appState = app as AppWithState;
+  const appState = getAppState();
 
   // 托盘右键菜单
   const contextMenu = Menu.buildFromTemplate([
@@ -43,7 +41,7 @@ export function createTray(mainWindow: BrowserWindow) {
       label: '退出',
       click: () => {
         appState.isQuitting = true;
-        app.quit();
+        mainWindow.destroy();
       },
     },
   ]);
@@ -56,11 +54,4 @@ export function createTray(mainWindow: BrowserWindow) {
   });
 
   return tray;
-}
-
-export function destroyTray() {
-  if (tray) {
-    tray.destroy();
-    tray = null;
-  }
 }

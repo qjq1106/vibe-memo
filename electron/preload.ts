@@ -24,6 +24,16 @@ contextBridge.exposeInMainWorld('electron', {
     show: () => ipcRenderer.send('app:show'),
   },
 
+  // 笔记事件（主进程 → 渲染进程）
+  note: {
+    onCreate: (callback: () => void) => {
+      ipcRenderer.on('note:create', () => callback());
+    },
+    onSave: (callback: () => void) => {
+      ipcRenderer.on('note:save', () => callback());
+    },
+  },
+
   // 自动更新
   update: {
     check: () => ipcRenderer.invoke('update:check'),
