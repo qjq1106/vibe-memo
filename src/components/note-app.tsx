@@ -7,6 +7,39 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 import "yet-another-react-lightbox/styles.css";
 
+// Electron IPC 类型
+interface ElectronAPI {
+  file: {
+    upload: (filePath: string) => Promise<{ success: boolean; path?: string; fileName?: string; error?: string }>;
+    delete: (filePath: string) => Promise<{ success: boolean; error?: string }>;
+    getUploadDir: () => Promise<string>;
+  };
+  darkMode: {
+    shouldUseDarkColors: boolean;
+    onChange: (callback: (isDark: boolean) => void) => void;
+  };
+  app: {
+    quit: () => void;
+    hide: () => void;
+    show: () => void;
+  };
+  update: {
+    check: () => Promise<unknown>;
+    install: () => void;
+    onAvailable: (callback: (info: unknown) => void) => void;
+    onDownloaded: (callback: () => void) => void;
+  };
+  tray: {
+    updateBadge: (hasUnsaved: boolean) => void;
+  };
+}
+
+declare global {
+  interface Window {
+    electron?: ElectronAPI;
+  }
+}
+
 type Attachment = {
   id: number;
   name: string;
@@ -103,7 +136,7 @@ export function NoteApp() {
   const mountedRef = useRef(false);
   const latestNotesRef = useRef<Note[]>([]);
   const saveNoteRef = useRef<
-    ((snapshot: NoteSnapshot) => Promise<boolean>) | null
+    ((snapshot: NoteSnapshot) => Promise<boolean | undefined>) | null
   >(null);
 
   const selectedNote = useMemo(
@@ -360,6 +393,52 @@ export function NoteApp() {
       window.removeEventListener("keydown", handleKeydown);
     };
   }, [draftContent, draftTitle, hasSelection, isEditorFocused, saveNote]);
+
+  // Electron IPC 事件监听
+  useEffect(() => {
+    if (!window.electron) {
+      return;
+    }
+
+    // 监听主进程的新建笔记事件
+    const handleCreateNote = () => {
+      void createNote();
+    };
+
+    // 监听主进程的保存事件
+    const handleSaveNote = () => {
+      if (hasSelection) {
+        void saveNote({
+          title: draftTitle,
+          content: draftContent,
+        });
+      }
+    };
+
+    // 监听更新可用事件
+    const handleUpdateAvailable = (info: unknown) => {
+      console.log("发现新版本:", info);
+    };
+
+    // 监听更新下载完成事件
+    const handleUpdateDownloaded = () => {
+      console.log("更新已下载完成");
+    };
+
+    // 使用 IPC 监听器
+    window.electron.update.onAvailable(handleUpdateAvailable);
+    window.electron.update.onDownloaded(handleUpdateDownloaded);
+
+    // 注意：需要通过其他方式监听 note:create 和 note:save
+    // 这里使用 window 监听器作为备选
+    window.addEventListener("electron-note-create", handleCreateNote);
+    window.addEventListener("electron-note-save", handleSaveNote);
+
+    return () => {
+      window.removeEventListener("electron-note-create", handleCreateNote);
+      window.removeEventListener("electron-note-save", handleSaveNote);
+    };
+  }, [createNote, saveNote, hasSelection, draftTitle, draftContent]);
 
   async function uploadAttachment(file: File) {
     if (!selectedNote) {
