@@ -6,7 +6,7 @@ import * as path from 'path';
 const DEFAULT_PORT = 37123;
 
 let nextProcess: ChildProcess | null = null;
-let serverPort = DEFAULT_PORT;
+const serverPort = DEFAULT_PORT;
 
 function getStandaloneDir(): string {
   if (app.isPackaged) {
