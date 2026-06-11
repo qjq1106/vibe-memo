@@ -25,8 +25,38 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                // 检测 Electron 环境
+                if (typeof window !== 'undefined' && window.electron) {
+                  // 从 Electron 获取系统主题
+                  const isDark = window.electron.darkMode.shouldUseDarkColors;
+                  document.documentElement.classList.toggle('dark', isDark);
+                  
+                  // 监听主题变化
+                  window.electron.darkMode.onChange((dark) => {
+                    document.documentElement.classList.toggle('dark', dark);
+                  });
+                } else {
+                  // Web 环境：跟随系统偏好
+                  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                  document.documentElement.classList.toggle('dark', mediaQuery.matches);
+                  
+                  mediaQuery.addEventListener('change', (e) => {
+                    document.documentElement.classList.toggle('dark', e.matches);
+                  });
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

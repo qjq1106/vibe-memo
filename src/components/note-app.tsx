@@ -103,7 +103,7 @@ export function NoteApp() {
   const mountedRef = useRef(false);
   const latestNotesRef = useRef<Note[]>([]);
   const saveNoteRef = useRef<
-    ((snapshot: NoteSnapshot) => Promise<boolean>) | null
+    ((snapshot: NoteSnapshot) => Promise<boolean | undefined>) | null
   >(null);
 
   const selectedNote = useMemo(
@@ -360,6 +360,35 @@ export function NoteApp() {
       window.removeEventListener("keydown", handleKeydown);
     };
   }, [draftContent, draftTitle, hasSelection, isEditorFocused, saveNote]);
+
+  // Electron IPC 事件监听
+  useEffect(() => {
+    if (!window.electron) {
+      return;
+    }
+
+    // 通过 preload 桥接监听主进程事件
+    window.electron.note.onCreate(() => {
+      void createNote();
+    });
+
+    window.electron.note.onSave(() => {
+      if (hasSelection) {
+        void saveNote({
+          title: draftTitle,
+          content: draftContent,
+        });
+      }
+    });
+
+    window.electron.update.onAvailable((info) => {
+      console.log("发现新版本:", info);
+    });
+
+    window.electron.update.onDownloaded(() => {
+      console.log("更新已下载完成");
+    });
+  }, [createNote, saveNote, hasSelection, draftTitle, draftContent]);
 
   async function uploadAttachment(file: File) {
     if (!selectedNote) {
