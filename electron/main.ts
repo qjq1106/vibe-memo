@@ -33,7 +33,6 @@ function createWindow() {
   // 开发环境加载 localhost，生产环境加载静态文件
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
-    mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(path.join(__dirname, '../out/index.html'));
   }
