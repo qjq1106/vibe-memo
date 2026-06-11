@@ -7,6 +7,7 @@ import { registerShortcuts } from './shortcuts';
 import { setupDarkMode } from './dark-mode';
 import { setupAutoUpdater } from './updater';
 import { getAppState } from './app-state';
+import { getServerUrl, startNextServer, stopNextServer } from './next-server';
 
 const appState = getAppState();
 appState.isQuitting = false;
@@ -21,7 +22,6 @@ function createWindow() {
     minWidth: 800,
     minHeight: 600,
     title: 'Vibe Memo',
-    icon: path.join(__dirname, '../public/icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -29,11 +29,10 @@ function createWindow() {
     },
   });
 
-  // 开发环境加载 localhost（由 dev:electron 脚本 wait-on 保证服务已就绪）
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../out/index.html'));
+    mainWindow.loadURL(getServerUrl());
   }
 
   // 点击链接在外部浏览器打开
@@ -67,7 +66,11 @@ if (!gotTheLock) {
     }
   });
 
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
+    if (!isDev) {
+      await startNextServer();
+    }
+
     createWindow();
     
     if (mainWindow) {
@@ -98,4 +101,5 @@ app.on('window-all-closed', () => {
 // 标记退出状态
   app.on('before-quit', () => {
   appState.isQuitting = true;
+  stopNextServer();
 });

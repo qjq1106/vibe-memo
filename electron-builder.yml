@@ -1,38 +1,35 @@
 appId: com.vibe.memo
 productName: Vibe Memo
 directories:
-  output: dist-electron
+  output: dist-electron/release
+  buildResources: public
 files:
-  - "out/**/*"
-  - "electron/**/*"
-  - "!**/*.ts"
-  - "!**/*.tsx"
-mac:
-  target:
-    - dmg
-    - zip
-  category: public.app-category.productivity
-  icon: public/icon.icns
+  - dist-electron/**/*
+  - package.json
+  - prisma/**/*
+  - prisma.config.ts
+extraResources:
+  - from: .next/standalone
+    to: standalone
+    filter:
+      - "**/*"
+asarUnpack:
+  - node_modules/better-sqlite3/**/*
+  - node_modules/@prisma/**/*
+  - node_modules/.prisma/**/*
 win:
   target:
     - nsis
     - portable
-  icon: public/icon.ico
   publisherName: Vibe Memo
+  signAndEditExecutable: false
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: Vibe Memo
-linux:
-  target:
-    - AppImage
-    - deb
-  category: Office
-  icon: public/icon.png
-  synapticPackageName: vibe-memo
 publish:
   provider: github
-  owner: your-username
+  owner: qjq1106
   repo: vibe-memo

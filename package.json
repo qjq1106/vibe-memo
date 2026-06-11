@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:electron": "tsc -p electron/tsconfig.json && concurrently -k \"next dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "build:electron": "tsc -p electron/tsconfig.json && next build && electron-builder",
+    "build:electron": "tsc -p electron/tsconfig.json && next build && node scripts/prepare-electron-build.cjs && electron-builder --win",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "node node_modules/prisma/build/index.js generate",
