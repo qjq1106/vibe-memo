@@ -29,7 +29,7 @@ function createWindow() {
     },
   });
 
-  // 开发环境加载 localhost，生产环境加载静态文件
+  // 开发环境加载 localhost（由 dev:electron 脚本 wait-on 保证服务已就绪）
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
   } else {
